@@ -81,7 +81,7 @@ void ImageViewer::rotateRight()
 
 void ImageViewer::changeBrightness(int brightness)
 {
-    if (brightness > 100 || brightness < -100) {
+    if (brightness > definitions.MAX_BRIGHTNESS || brightness < definitions.MIN_BRIGHTNESS) {
         std::cerr << "Incorrect brightness value: " << brightness << ". Ignoring...\n";
         return;
     }
@@ -100,7 +100,9 @@ void ImageViewer::changeBrightness(int brightness)
                 newPixel = pixel.lighter(tempBrightness);
             }
             else if (brightness < 0) {
-                const int tempBrightness = 200 + brightness;
+                // selected brightness is multiplied by a factor of 2 to achieve better results.
+                // the reason is due to the logarithm result of the values passed to the darker function
+                const int tempBrightness = 100 + abs(brightness) * 2;
                 newPixel = pixel.darker(tempBrightness);
             }
             else { // if brightness is 0 we just use the original image
