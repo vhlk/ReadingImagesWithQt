@@ -13,8 +13,9 @@
 #include <QScrollBar>
 #include <QMenuBar>
 #include <QApplication>
+#include <QInputDialog>
 
-ImageViewer::ImageViewer(QWidget* parent): QMainWindow(parent), imageLabel(new QLabel), scrollArea(new QScrollArea)
+ImageViewer::ImageViewer(QWidget* parent): QMainWindow(parent), imageLabel(new QLabel), scrollArea(new QScrollArea), filesListView(new QListView)
 {
     imageLabel->setBackgroundRole(QPalette::Base);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -78,8 +79,39 @@ void ImageViewer::rotateRight()
 {
 }
 
-void ImageViewer::changeBrightness()
+void ImageViewer::changeBrightness(int brightness)
 {
+    if (brightness > 100 || brightness < -100) {
+        std::cerr << "Incorrect brightness value: " << brightness << ". Ignoring...\n";
+        return;
+    }
+
+    currImage = loadedImage;
+
+    for (int i = 0; i < loadedImage.width(); i++) {
+        for (int j = 0; j < loadedImage.height(); j++) {
+            const QColor pixel = loadedImage.pixelColor(i, j);
+
+            QColor newPixel;
+
+            // check if we are increasing or decreasing the brightness
+            if (brightness > 0) {
+                const int tempBrightness = 100 + brightness;
+                newPixel = pixel.lighter(tempBrightness);
+            }
+            else if (brightness < 0) {
+                const int tempBrightness = 200 + brightness;
+                newPixel = pixel.darker(tempBrightness);
+            }
+            else { // if brightness is 0 we just use the original image
+                newPixel = pixel;
+            }
+
+            currImage.setPixelColor(i, j, newPixel);
+        }
+    }
+
+    imageLabel->setPixmap(QPixmap::fromImage(currImage));
 }
 
 void ImageViewer::fitImageToWindow()
@@ -91,6 +123,18 @@ void ImageViewer::fitImageToWindow()
         setImageOriginalSize();
 
     activateActionsOnFitToWindow();
+}
+
+void ImageViewer::createBrightnessDialog()
+{
+    bool ok;
+    int i = QInputDialog::getInt(this, tr("Set image brightness"), tr("Brightness:"), currBrightness, definitions.MIN_BRIGHTNESS, definitions.MAX_BRIGHTNESS, 1, &ok);
+
+    if (ok) {
+        currBrightness = i;
+
+        changeBrightness(i);
+    }
 }
 
 void ImageViewer::createFileChooserDialog(QFileDialog& dialog)
@@ -108,6 +152,7 @@ void ImageViewer::createFileChooserDialog(QFileDialog& dialog)
     dialog.setMimeTypeFilters(mimeTypeFilters);
     dialog.selectMimeTypeFilter("image/jpeg");
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setFileMode(QFileDialog::ExistingFiles); // enable to choose several files
 }
 
 bool ImageViewer::loadImage(const QString& filepath)
@@ -150,7 +195,7 @@ void ImageViewer::loadImageToScreen(const QImage& image) {
     imgScale = 1;
 
     scrollArea->setVisible(true);
-    activateActionsOnFitToWindow();
+    activateActions();
 }
 
 void ImageViewer::scaleImage(double factor)
@@ -200,6 +245,18 @@ void ImageViewer::createActionBar()
     removeZoomAction = viewMenu->addAction(tr("Normal Size"), this, &ImageViewer::setImageOriginalSize);
     removeZoomAction->setShortcut(tr("Ctrl+0"));
     removeZoomAction->setEnabled(false);
+
+    viewMenu->addSeparator();
+
+    changeBrightnessAction = viewMenu->addAction(tr("Brightness..."), this, &ImageViewer::createBrightnessDialog);
+    changeBrightnessAction->setEnabled(false);
+}
+
+void ImageViewer::activateActions()
+{
+    changeBrightnessAction->setEnabled(true);
+
+    activateActionsOnFitToWindow();
 }
 
 void ImageViewer::activateActionsOnFitToWindow()
