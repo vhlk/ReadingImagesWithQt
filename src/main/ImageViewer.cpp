@@ -55,30 +55,6 @@ void ImageViewer::setImageOriginalSize()
     imgScale = 1.0;
 }
 
-void ImageViewer::moveRight()
-{
-}
-
-void ImageViewer::moveLeft()
-{
-}
-
-void ImageViewer::moveUp()
-{
-}
-
-void ImageViewer::moveDown()
-{
-}
-
-void ImageViewer::rotateLeft()
-{
-}
-
-void ImageViewer::rotateRight()
-{
-}
-
 void ImageViewer::changeBrightnessContrast()
 {
     if (currBrightness > definitions.MAX_BRIGHTNESS || currBrightness < definitions.MIN_BRIGHTNESS) {
@@ -106,6 +82,10 @@ void ImageViewer::changeBrightnessContrast()
     }
 
     imageLabel->setPixmap(QPixmap::fromImage(currImage));
+
+    // set the rotation again, if there is any
+    if (currRotation != 0)
+        applyRotation(currRotation);
 }
 
 /// <summary>
@@ -192,6 +172,20 @@ void ImageViewer::createContrastDialog()
     }
 }
 
+void ImageViewer::rotateLeft()
+{
+    currRotation -= 45;
+
+    applyRotation(currRotation);
+}
+
+void ImageViewer::rotateRight()
+{
+    currRotation += 45;
+
+    applyRotation(currRotation);
+}
+
 void ImageViewer::createFileChooserDialog(QFileDialog& dialog)
 {
     static bool firstDialog = true;
@@ -237,6 +231,7 @@ bool ImageViewer::loadImage(const QString& filepath)
 
 void ImageViewer::loadImageToScreen(const QImage& image) {
     loadedImage = image;
+    currImage = image;
 
     if (loadedImage.colorSpace().isValid())
         loadedImage.convertToColorSpace(QColorSpace::SRgb);
@@ -248,6 +243,9 @@ void ImageViewer::loadImageToScreen(const QImage& image) {
         setImageOriginalSize();
 
     imgScale = 1;
+    currBrightness = 0;
+    currContrast = 0;
+    currRotation = 0;
 
     scrollArea->setVisible(true);
     activateActions();
@@ -301,6 +299,14 @@ void ImageViewer::createActionBar()
     removeZoomAction->setShortcut(tr("Ctrl+0"));
     removeZoomAction->setEnabled(false);
 
+    viewMenu->addSeparator();
+
+    rotateLeftAction = viewMenu->addAction(tr(QString::fromUtf16(u"Rotate Left (45°)").toStdString().c_str()), this, &ImageViewer::rotateLeft);
+    rotateLeftAction->setEnabled(false);
+
+    rotateRightAction = viewMenu->addAction(tr(QString::fromUtf16(u"Rotate Right (45°)").toStdString().c_str()), this, &ImageViewer::rotateRight);
+    rotateRightAction->setEnabled(false);
+
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
 
     changeBrightnessAction = editMenu->addAction(tr("Brightness..."), this, &ImageViewer::createBrightnessDialog);
@@ -314,6 +320,8 @@ void ImageViewer::activateActions()
 {
     changeBrightnessAction->setEnabled(true);
     changeContrastAction->setEnabled(true);
+    rotateLeftAction->setEnabled(true);
+    rotateRightAction->setEnabled(true);
 
     activateActionsOnFitToWindow();
 }
@@ -323,4 +331,13 @@ void ImageViewer::activateActionsOnFitToWindow()
     zoomInAction->setEnabled(!fitToWindowAction->isChecked() && !loadedImage.size().isNull());
     zoomOutAction->setEnabled(!fitToWindowAction->isChecked() && !loadedImage.size().isNull());
     removeZoomAction->setEnabled(!fitToWindowAction->isChecked() && !loadedImage.size().isNull());
+}
+
+void ImageViewer::applyRotation(int rotation)
+{
+    auto pixmap = QPixmap::fromImage(currImage);
+    QTransform tr;
+    tr.rotate(rotation);
+    pixmap = pixmap.transformed(tr);
+    imageLabel->setPixmap(pixmap);
 }

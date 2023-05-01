@@ -21,15 +21,11 @@ private slots:
 	void zoomIn();
 	void zoomOut();
 	void setImageOriginalSize();
-	void moveRight();
-	void moveLeft();
-	void moveUp();
-	void moveDown();
-	void rotateLeft();
-	void rotateRight();
 	void fitImageToWindow();
 	void createBrightnessDialog();
 	void createContrastDialog();
+	void rotateLeft();
+	void rotateRight();
 
 private:
 	void changeBrightnessContrast();
@@ -44,6 +40,7 @@ private:
 	void createActionBar();
 	void activateActions();
 	void activateActionsOnFitToWindow();
+	void applyRotation(int rotation);
 
 private:
 	QImage loadedImage;
@@ -57,12 +54,16 @@ private:
 	int currBrightness = 0;
 	int currContrast = 0;
 
+	int currRotation = 0;
+
 	QAction* fitToWindowAction;
 	QAction* zoomInAction;
 	QAction* zoomOutAction;
 	QAction* removeZoomAction;
 	QAction* changeBrightnessAction;
 	QAction* changeContrastAction;
+	QAction* rotateLeftAction;
+	QAction* rotateRightAction;
 
 	Definitions definitions;
 };
