@@ -301,12 +301,12 @@ void ImageViewer::createActionBar()
     removeZoomAction->setShortcut(tr("Ctrl+0"));
     removeZoomAction->setEnabled(false);
 
-    viewMenu->addSeparator();
+    QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
 
-    changeBrightnessAction = viewMenu->addAction(tr("Brightness..."), this, &ImageViewer::createBrightnessDialog);
+    changeBrightnessAction = editMenu->addAction(tr("Brightness..."), this, &ImageViewer::createBrightnessDialog);
     changeBrightnessAction->setEnabled(false);
 
-    changeContrastAction = viewMenu->addAction(tr("Contrast..."), this, &ImageViewer::createContrastDialog);
+    changeContrastAction = editMenu->addAction(tr("Contrast..."), this, &ImageViewer::createContrastDialog);
     changeContrastAction->setEnabled(false);
 }
 
