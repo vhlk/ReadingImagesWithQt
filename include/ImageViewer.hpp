@@ -1,4 +1,5 @@
 #include <string>
+#include <optional>
 
 #include <ImageViewerDefinitions.hpp>
 
@@ -28,9 +29,13 @@ private slots:
 	void rotateRight();
 	void fitImageToWindow();
 	void createBrightnessDialog();
+	void createContrastDialog();
 
 private:
-	void changeBrightness(int brightness);
+	void changeBrightnessContrast();
+	constexpr std::optional<QColor> applyContrast(const QColor& pixel, const int contrast) const;
+	constexpr std::optional<QColor> applyBrightness(const QColor& pixel, const int brightness) const;
+	constexpr int truncateRGBInterval(const int value) const;
 	void createFileChooserDialog(QFileDialog& dialog);
 	bool loadImage(const QString& filepath);
 	void loadImageToScreen(const QImage& image);
@@ -50,12 +55,14 @@ private:
 	double imgScale = 1;
 
 	int currBrightness = 0;
+	int currContrast = 0;
 
 	QAction* fitToWindowAction;
 	QAction* zoomInAction;
 	QAction* zoomOutAction;
 	QAction* removeZoomAction;
 	QAction* changeBrightnessAction;
+	QAction* changeContrastAction;
 
 	Definitions definitions;
 };

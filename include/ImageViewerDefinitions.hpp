@@ -5,4 +5,7 @@ public:
 	
 	constexpr static double MAX_BRIGHTNESS = 100;
 	constexpr static double MIN_BRIGHTNESS = -100;
+
+	constexpr static double MAX_CONTRAST = 128;
+	constexpr static double MIN_CONTRAST = -128;
 };

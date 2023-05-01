@@ -79,10 +79,15 @@ void ImageViewer::rotateRight()
 {
 }
 
-void ImageViewer::changeBrightness(int brightness)
+void ImageViewer::changeBrightnessContrast()
 {
-    if (brightness > definitions.MAX_BRIGHTNESS || brightness < definitions.MIN_BRIGHTNESS) {
-        std::cerr << "Incorrect brightness value: " << brightness << ". Ignoring...\n";
+    if (currBrightness > definitions.MAX_BRIGHTNESS || currBrightness < definitions.MIN_BRIGHTNESS) {
+        std::cerr << "Incorrect brightness value: " << currBrightness << ". Ignoring the call for brightness and contrast change...\n";
+        return;
+    }
+
+    if (currContrast > definitions.MAX_CONTRAST || currContrast < definitions.MIN_CONTRAST) {
+        std::cerr << "Incorrect contrast value: " << currContrast << ". Ignoring the call for brightness and contrast change...\n";
         return;
     }
 
@@ -92,28 +97,64 @@ void ImageViewer::changeBrightness(int brightness)
         for (int j = 0; j < loadedImage.height(); j++) {
             const QColor pixel = loadedImage.pixelColor(i, j);
 
-            QColor newPixel;
-
-            // check if we are increasing or decreasing the brightness
-            if (brightness > 0) {
-                const int tempBrightness = 100 + brightness;
-                newPixel = pixel.lighter(tempBrightness);
-            }
-            else if (brightness < 0) {
-                // selected brightness is multiplied by a factor of 2 to achieve better results.
-                // the reason is due to the logarithm result of the values passed to the darker function
-                const int tempBrightness = 100 + abs(brightness) * 2;
-                newPixel = pixel.darker(tempBrightness);
-            }
-            else { // if brightness is 0 we just use the original image
-                newPixel = pixel;
-            }
-
-            currImage.setPixelColor(i, j, newPixel);
+            // value is not been checked because we confirm it is in range before
+            const QColor pixelBright = applyBrightness(pixel, currBrightness).value(); 
+            const QColor pixelBrightContrast = applyContrast(pixelBright, currContrast).value();
+            
+            currImage.setPixelColor(i, j, pixelBrightContrast);
         }
     }
 
     imageLabel->setPixmap(QPixmap::fromImage(currImage));
+}
+
+/// <summary>
+/// Applies contrast to a pixel using contrast adjustment provided by https://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/.
+/// </summary>
+/// <param name="pixel">The pixel to apply the contrast</param>
+/// <param name="contrast">The contrast level (from -128 to 128)</param>
+/// <returns>The pixel with the adjusted values if the contrast is in range.</returns>
+constexpr std::optional<QColor> ImageViewer::applyContrast(const QColor& pixel, int contrast) const
+{
+    if (contrast < definitions.MIN_CONTRAST || contrast > definitions.MAX_CONTRAST)
+        return std::nullopt;
+
+    const double factor = (double) (259 * (contrast + 255)) / (255 * (259 - contrast));
+    const int red = truncateRGBInterval(factor * (pixel.red() - 128) + 128);
+    const int green = truncateRGBInterval(factor * (pixel.green() - 128) + 128);
+    const int blue = truncateRGBInterval(factor * (pixel.blue() - 128) + 128);
+    
+    return QColor(red, green, blue);
+}
+
+constexpr std::optional<QColor> ImageViewer::applyBrightness(const QColor& pixel, const int brightness) const
+{
+    if (brightness < definitions.MIN_BRIGHTNESS || brightness > definitions.MAX_BRIGHTNESS)
+        return std::nullopt;
+
+    // check if we are increasing or decreasing the brightness
+    if (currBrightness > 0) {
+        const int tempBrightness = 100 + currBrightness;
+        return pixel.lighter(tempBrightness);
+    }
+    else if (currBrightness < 0) {
+        // selected brightness is multiplied by a factor of 2 to achieve better results.
+        // the reason is due to the logarithm result of the values passed to the darker function
+        const int tempBrightness = 100 + abs(currBrightness) * 2;
+        return pixel.darker(tempBrightness);
+    }
+    else { 
+        // if brightness is 0 we just use the original image
+        return QColor(pixel);
+    }
+}
+
+constexpr int ImageViewer::truncateRGBInterval(const int value) const
+{
+    const int rgbMax = 255;
+    const int rgbMin = 0;
+
+    return std::min(std::max(rgbMin, value), rgbMax);
 }
 
 void ImageViewer::fitImageToWindow()
@@ -130,12 +171,24 @@ void ImageViewer::fitImageToWindow()
 void ImageViewer::createBrightnessDialog()
 {
     bool ok;
-    int i = QInputDialog::getInt(this, tr("Set image brightness"), tr("Brightness:"), currBrightness, definitions.MIN_BRIGHTNESS, definitions.MAX_BRIGHTNESS, 1, &ok);
+    const int i = QInputDialog::getInt(this, tr("Set image brightness"), tr("Brightness:"), currBrightness, definitions.MIN_BRIGHTNESS, definitions.MAX_BRIGHTNESS, 1, &ok);
 
     if (ok) {
         currBrightness = i;
 
-        changeBrightness(i);
+        changeBrightnessContrast();
+    }
+}
+
+void ImageViewer::createContrastDialog()
+{
+    bool ok;
+    const int i = QInputDialog::getInt(this, tr("Set image contrast"), tr("Contrast:"), currContrast, definitions.MIN_CONTRAST, definitions.MAX_CONTRAST, 1, &ok);
+
+    if (ok) {
+        currContrast = i;
+
+        changeBrightnessContrast();
     }
 }
 
@@ -252,11 +305,15 @@ void ImageViewer::createActionBar()
 
     changeBrightnessAction = viewMenu->addAction(tr("Brightness..."), this, &ImageViewer::createBrightnessDialog);
     changeBrightnessAction->setEnabled(false);
+
+    changeContrastAction = viewMenu->addAction(tr("Contrast..."), this, &ImageViewer::createContrastDialog);
+    changeContrastAction->setEnabled(false);
 }
 
 void ImageViewer::activateActions()
 {
     changeBrightnessAction->setEnabled(true);
+    changeContrastAction->setEnabled(true);
 
     activateActionsOnFitToWindow();
 }
