@@ -10,6 +10,9 @@
 #include <QListWidget>
 #include <QGridLayout>
 
+/// <summary>
+/// Class for displaying a Image Viewer window.
+/// </summary>
 class ImageViewer : public QMainWindow
 {
 	Q_OBJECT
@@ -33,7 +36,7 @@ private:
 	void changeBrightnessContrast();
 	constexpr std::optional<QColor> applyContrast(const QColor& pixel, const int contrast) const;
 	constexpr std::optional<QColor> applyBrightness(const QColor& pixel, const int brightness) const;
-	constexpr int truncateRGBInterval(const int value) const;
+	constexpr int truncateRGBInterval(const int value) const; // makes sure a value is in RGB accepted range
 	void createFileChooserDialog(QFileDialog& dialog);
 	bool loadImages(const QStringList& filepaths);
 	bool loadImage(const QString& filepath);
@@ -41,8 +44,8 @@ private:
 	void scaleImage(double factor);
 	void adjustScrollBar(QScrollBar* scrollBar, double factor);
 	void createActionBar();
-	void activateActions();
-	void activateActionsOnFitToWindow();
+	void activateActions(); // activate menu actions
+	void activateActionsOnFitToWindow(); // activate menu actions based in fit to window been selected or not
 	void applyRotation(int rotation);
 
 private:

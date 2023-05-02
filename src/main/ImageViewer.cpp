@@ -24,14 +24,14 @@ ImageViewer::ImageViewer(QWidget* parent): QMainWindow(parent), imageLabel(new Q
 
     scrollArea->setBackgroundRole(QPalette::Dark);
     scrollArea->setWidget(imageLabel);
-    scrollArea->setVisible(false);
+    scrollArea->setVisible(false); // show only when a image is loaded
 
     filesListWidget->setWordWrap(true);
     filesListWidget->setWrapping(true);
-    connect(filesListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onFileListWidgetClicked()));
+    connect(filesListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onFileListWidgetClicked())); // when a item is selected from filesListWidget
     filesListWidget->setVisible(false);
 
-    auto windowSize = QGuiApplication::primaryScreen()->availableSize() * 3 / 5;
+    const auto windowSize = QGuiApplication::primaryScreen()->availableSize() * 3 / 5;
 
     filesListWidget->setFixedSize(150, windowSize.height());
     scrollArea->setFixedSize(windowSize.width() - 150, windowSize.height());
@@ -158,7 +158,7 @@ constexpr int ImageViewer::truncateRGBInterval(const int value) const
 
 void ImageViewer::fitImageToWindow()
 {
-    bool fitToWindow = fitToWindowAction->isChecked();
+    const bool fitToWindow = fitToWindowAction->isChecked();
     scrollArea->setWidgetResizable(fitToWindow);
 
     if (!fitToWindow)
@@ -232,7 +232,7 @@ bool ImageViewer::loadImages(const QStringList& filepaths)
 {   
     chosenFiles = filepaths;
 
-    auto windowSize = QGuiApplication::primaryScreen()->availableSize() * 3 / 5;
+    const auto windowSize = QGuiApplication::primaryScreen()->availableSize() * 3 / 5;
 
     if (filepaths.count() > 1) {
         scrollArea->setFixedSize(windowSize.width() - 150, windowSize.height());
@@ -240,7 +240,7 @@ bool ImageViewer::loadImages(const QStringList& filepaths)
         // show only the file names
         QStringList tempStringList;
         for (auto& filepath : chosenFiles) {
-            std::string fileName = (std::filesystem::path(filepath.toStdString()).filename()).string();
+            const std::string fileName = (std::filesystem::path(filepath.toStdString()).filename()).string();
 
             tempStringList.append(QString::fromStdString(fileName));
         }
