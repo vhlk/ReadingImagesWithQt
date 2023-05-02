@@ -2,18 +2,18 @@
 
 Visualizing files with Qt.
 
-![Image Viewer image]("images/QtImageViewer1.png" "Qt Image Viewer")
+![Image Viewer image](images/QtImageViewer1.png "Qt Image Viewer")
 
 # What is available
 
 1. Basic image visualization: Fit to window, zoom, and rotation.
-![Image Viewer image of visualization]("images/QtImageViewer3.png" "Qt Image Viewer visualization options")
+![Image Viewer image of visualization](images/QtImageViewer3.png "Qt Image Viewer visualization options")
 
 2. Basic image edit: brightness and contrast.
-![Image Viewer image of image editing]("images/QtImageViewer4.png" "Qt Image Viewer editing options")
+![Image Viewer image of image editing](images/QtImageViewer4.png "Qt Image Viewer editing options")
 
 3. Open multiple files.
-![Image Viewer image of multiple open files]("images/QtImageViewer2.png" "Qt Image Viewer multiple open files")
+![Image Viewer image of multiple open files](images/QtImageViewer2.png "Qt Image Viewer multiple open files")
 
 # How to run
 
