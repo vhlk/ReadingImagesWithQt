@@ -1,6 +1,7 @@
 #include "ImageViewer.hpp"
 
 #include<iostream>
+#include <filesystem>
 
 #include <QGuiApplication>
 #include <QScreen>
@@ -15,7 +16,7 @@
 #include <QApplication>
 #include <QInputDialog>
 
-ImageViewer::ImageViewer(QWidget* parent): QMainWindow(parent), imageLabel(new QLabel), scrollArea(new QScrollArea), filesListView(new QListView)
+ImageViewer::ImageViewer(QWidget* parent): QMainWindow(parent), imageLabel(new QLabel), scrollArea(new QScrollArea), filesListWidget(new QListWidget), gridLayout(new QGridLayout)
 {
     imageLabel->setBackgroundRole(QPalette::Base);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -24,11 +25,29 @@ ImageViewer::ImageViewer(QWidget* parent): QMainWindow(parent), imageLabel(new Q
     scrollArea->setBackgroundRole(QPalette::Dark);
     scrollArea->setWidget(imageLabel);
     scrollArea->setVisible(false);
-    setCentralWidget(scrollArea);
+
+    filesListWidget->setWordWrap(true);
+    filesListWidget->setWrapping(true);
+    connect(filesListWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(onFileListWidgetClicked()));
+    filesListWidget->setVisible(false);
+
+    auto windowSize = QGuiApplication::primaryScreen()->availableSize() * 3 / 5;
+
+    filesListWidget->setFixedSize(150, windowSize.height());
+    scrollArea->setFixedSize(windowSize.width() - 150, windowSize.height());
+
+    gridLayout->addWidget(filesListWidget, 0, 0);
+    gridLayout->addWidget(scrollArea, 0, 1);
+
+    gridLayout->setHorizontalSpacing(5);
+
+    QWidget* gridWidget = new QWidget(parent);
+    gridWidget->setLayout(gridLayout);
+    setCentralWidget(gridWidget);
 
     createActionBar();
 
-    resize(QGuiApplication::primaryScreen()->availableSize() * 3 / 5);
+    resize(windowSize.width() + 5, windowSize.height());
 }
 
 void ImageViewer::openImage()
@@ -36,7 +55,7 @@ void ImageViewer::openImage()
     QFileDialog dialog(this, tr("Open File"));
     createFileChooserDialog(dialog);
 
-    while (dialog.exec() == QDialog::Accepted && !loadImage(dialog.selectedFiles().constFirst())) {}
+    while (dialog.exec() == QDialog::Accepted && !loadImages(dialog.selectedFiles())) {}
 }
 
 void ImageViewer::zoomIn()
@@ -186,6 +205,11 @@ void ImageViewer::rotateRight()
     applyRotation(currRotation);
 }
 
+void ImageViewer::onFileListWidgetClicked()
+{
+    loadImage(chosenFiles.at(filesListWidget->currentRow()));
+}
+
 void ImageViewer::createFileChooserDialog(QFileDialog& dialog)
 {
     static bool firstDialog = true;
@@ -202,6 +226,37 @@ void ImageViewer::createFileChooserDialog(QFileDialog& dialog)
     dialog.selectMimeTypeFilter("image/jpeg");
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
     dialog.setFileMode(QFileDialog::ExistingFiles); // enable to choose several files
+}
+
+bool ImageViewer::loadImages(const QStringList& filepaths)
+{   
+    chosenFiles = filepaths;
+
+    auto windowSize = QGuiApplication::primaryScreen()->availableSize() * 3 / 5;
+
+    if (filepaths.count() > 1) {
+        scrollArea->setFixedSize(windowSize.width() - 150, windowSize.height());
+
+        // show only the file names
+        QStringList tempStringList;
+        for (auto& filepath : chosenFiles) {
+            std::string fileName = (std::filesystem::path(filepath.toStdString()).filename()).string();
+
+            tempStringList.append(QString::fromStdString(fileName));
+        }
+
+        filesListWidget->clear();
+        filesListWidget->addItems(tempStringList);
+        filesListWidget->setCurrentRow(0);
+        filesListWidget->setVisible(true);
+    }
+    else {
+        // if we don't need file list view, we can use the whole space for the image view
+        filesListWidget->setVisible(false);
+        scrollArea->setFixedSize(windowSize.width(), windowSize.height());
+    }
+
+    return loadImage(filepaths.constFirst());
 }
 
 bool ImageViewer::loadImage(const QString& filepath)

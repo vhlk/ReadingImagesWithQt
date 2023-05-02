@@ -7,7 +7,8 @@
 #include <QFileDialog>
 #include <QLabel>
 #include <QScrollArea>
-#include <QListView>
+#include <QListWidget>
+#include <QGridLayout>
 
 class ImageViewer : public QMainWindow
 {
@@ -26,6 +27,7 @@ private slots:
 	void createContrastDialog();
 	void rotateLeft();
 	void rotateRight();
+	void onFileListWidgetClicked();
 
 private:
 	void changeBrightnessContrast();
@@ -33,6 +35,7 @@ private:
 	constexpr std::optional<QColor> applyBrightness(const QColor& pixel, const int brightness) const;
 	constexpr int truncateRGBInterval(const int value) const;
 	void createFileChooserDialog(QFileDialog& dialog);
+	bool loadImages(const QStringList& filepaths);
 	bool loadImage(const QString& filepath);
 	void loadImageToScreen(const QImage& image);
 	void scaleImage(double factor);
@@ -47,7 +50,8 @@ private:
 	QImage currImage; // if the image has any modification to its attribute (brightness, contrast...) this will store the modified image
 	QLabel* imageLabel; // displays the image
 	QScrollArea* scrollArea;
-	QListView* filesListView;
+	QListWidget* filesListWidget;
+	QGridLayout* gridLayout;
 
 	double imgScale = 1;
 
@@ -55,6 +59,8 @@ private:
 	int currContrast = 0;
 
 	int currRotation = 0;
+
+	QStringList chosenFiles;
 
 	QAction* fitToWindowAction;
 	QAction* zoomInAction;
