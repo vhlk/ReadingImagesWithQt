@@ -7,7 +7,7 @@ Supported image formats: BMP, PNG, JPEG/JPG. Default: JPEG.
 
 # What is available
 
-1. Basic image visualization: Fit to window, zoom, and rotation.
+1. Basic image visualization: Fit to window, zoom, panning, and rotation.
 ![Image Viewer image of visualization](images/QtImageViewer3.png "Qt Image Viewer visualization options")
 
 2. Basic image edit: brightness and contrast.
@@ -17,9 +17,11 @@ Supported image formats: BMP, PNG, JPEG/JPG. Default: JPEG.
 ![Image Viewer image of multiple open files](images/QtImageViewer2.png "Qt Image Viewer multiple open files")
 
 # How to run
+Start by loading one or more images (File > Open...). Use the Manu to control the image visualization and access specific functions.
+Next will be discussed platform specirics to run the application.
 
 ## Windows
-Just run the file "ReadingImagesQt.exe" at the releaseApp directory to test it!
+Just run the file "ReadingImagesQt.exe" at the "releaseApp" directory to test it!
 
 ## Building or other platforms
 ### Prerequisites
