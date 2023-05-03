@@ -3,6 +3,7 @@
 Visualizing files with Qt.
 
 ![Image Viewer image](images/QtImageViewer1.png "Qt Image Viewer")
+Supported image formats: BMP, PNG, JPEG/JPG. Default: JPEG.
 
 # What is available
 
