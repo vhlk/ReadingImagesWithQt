@@ -17,7 +17,8 @@ Supported image formats: BMP, PNG, JPEG/JPG. Default: JPEG.
 ![Image Viewer image of multiple open files](images/QtImageViewer2.png "Qt Image Viewer multiple open files")
 
 # How to run
-Start by loading one or more images (File > Open...). Use the Manu to control the image visualization and access specific functions.
+Start by loading one or more images (File > Open...). Use the Menu to control the image visualization and access specific functions.
+
 Next will be discussed platform specirics to run the application.
 
 ## Windows
